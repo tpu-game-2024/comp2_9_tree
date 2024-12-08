@@ -4,6 +4,8 @@
 
 #include "../include/lib_func.h"
 
+#define MAX_DATA 256
+
 
 // 2分木の初期化
 void initialize(tree* t)
@@ -61,6 +63,7 @@ bool add(tree* t, int key, const char* value)
 	if (t == NULL) return false;
 
 	node* p = generate(key, value);
+
 	if (p == NULL) return false;// メモリ確保できなかった。
 
 	if (t->root == NULL) {
@@ -70,18 +73,69 @@ bool add(tree* t, int key, const char* value)
 
 	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
 
+	struct node_* p2 = t->root;
+
+	while (1) {
+		if (key < p2->key) {
+			if (p2->left == NULL) {
+				p2->left = p;
+				break;
+			}
+			p2 = p2->left;
+		}
+		else if (key > p2->key) {
+			if (p2->right == NULL) {
+				p2->right = p;
+				break;
+			}
+			p2 = p2->right;
+		}
+		else if (key == p2->key) {
+			for (int i = 0; i < MAX_DATA; i++) {
+				p2->value[i] = p->value[i];
+			}
+			free(p);
+			break;
+		}
+	}
+
 	return true;
 }
 
 // keyの値を見てノードを検索して、値を取得する
 const char* find(const tree* t, int key)
 {
-	// ToDo: 実装する
+	struct node_* p;
+	p = t->root;
+
+	while (p) {
+		if (key < p->key) {
+			p = p->left;
+		}
+		else if (key > p->key) {
+			p = p->right;
+		}
+		else {
+			return p->value;
+		}
+	}
 	return NULL;
+}
+
+void inorder(struct node_* n, void(*func)(const node* p)) 
+{
+	if (n != NULL) {
+		inorder(n->left, func);
+		func(n);
+		inorder(n->right, func);
+	}
+	return;
 }
 
 // keyの小さな順にコールバック関数funcを呼び出す
 void search(const tree* t, void (*func)(const node* p))
 {
-	// ToDo: 実装する
+	struct node_* p = t->root;
+	inorder(p, func);
+	return;
 }
