@@ -58,30 +58,75 @@ static node* generate(int key, const char* value)
 // keyの値を見てノードを追加する
 bool add(tree* t, int key, const char* value)
 {
-	if (t == NULL) return false;
+    if (t == NULL) return false;
 
-	node* p = generate(key, value);
-	if (p == NULL) return false;// メモリ確保できなかった。
+    node* p = generate(key, value);
+    if (p == NULL) return false; // メモリ確保できなかった。
 
-	if (t->root == NULL) {
-		t->root = p;
-		return true;
-	}
+    if (t->root == NULL) {
+        t->root = p;
+        return true;
+    }
 
-	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
-
-	return true;
+    node* current = t->root;
+    while (true) {
+        if (key == current->key) {
+            // 同じキーがある場合、値を上書きする
+            memcpy(current->value, value, strlen(value) + 1);
+            free(p);
+            return true;
+        }
+        else if (key < current->key) {
+            if (current->left == NULL) {
+                current->left = p;
+                return true;
+            }
+            current = current->left;
+        }
+        else {
+            if (current->right == NULL) {
+                current->right = p;
+                return true;
+            }
+            current = current->right;
+        }
+    }
 }
 
 // keyの値を見てノードを検索して、値を取得する
 const char* find(const tree* t, int key)
 {
-	// ToDo: 実装する
-	return NULL;
+    if (t == NULL || t->root == NULL) return NULL;
+
+    node* current = t->root;
+    while (current != NULL) {
+        if (key == current->key) {
+            return current->value;
+        }
+        else if (key < current->key) {
+            current = current->left;
+        }
+        else {
+            current = current->right;
+        }
+    }
+
+    return NULL; // 見つからなかった場合
+}
+
+static void inorder_traversal(const node* n, void (*func)(const node* p))
+{
+    if (n == NULL) return;
+
+    inorder_traversal(n->left, func);
+    func(n);
+    inorder_traversal(n->right, func);
 }
 
 // keyの小さな順にコールバック関数funcを呼び出す
 void search(const tree* t, void (*func)(const node* p))
 {
-	// ToDo: 実装する
+    if (t == NULL || t->root == NULL || func == NULL) return;
+
+    inorder_traversal(t->root, func);
 }
