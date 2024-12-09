@@ -61,27 +61,72 @@ bool add(tree* t, int key, const char* value)
 	if (t == NULL) return false;
 
 	node* p = generate(key, value);
-	if (p == NULL) return false;// メモリ確保できなかった。
+	if (p == NULL) return false;
 
 	if (t->root == NULL) {
 		t->root = p;
 		return true;
 	}
-
 	// Todo: t->rootの下にkeyの値の大小でleftかrightを切り替えながらpを追加する処理を実装する
-
-	return true;
+	node* current = t->root;
+	while (true) {
+		if (key < current->key) {
+			if (current->left == NULL) {
+				current->left = p;
+				return true;
+			}
+			current = current->left;
+		}
+		else {
+			if (current->right == NULL) {
+				current->right = p;
+				return true;
+			}
+			current = current->right;
+		}
+	}
 }
 
 // keyの値を見てノードを検索して、値を取得する
-const char* find(const tree* t, int key)
+const char* find(const tree * t, int key)
 {
 	// ToDo: 実装する
+	if (t == NULL) return NULL;
+
+	node* current = t->root;
+	while (current != NULL) {
+		if (key == current->key) {
+			return current->value;
+		}
+		else if (key < current->key) {
+			current = current->left;
+		}
+		else {
+			current = current->right;
+		}
+	}
 	return NULL;
 }
 
+
 // keyの小さな順にコールバック関数funcを呼び出す
-void search(const tree* t, void (*func)(const node* p))
+void search(const tree * t, void (*func)(const node * p))
 {
 	// ToDo: 実装する
+	if (t == NULL || func == NULL) return;
+
+	node* stack[100]; 
+	int top = -1;
+	node* current = t->root;
+
+	while (current != NULL || top != -1) {
+		while (current != NULL) {
+			stack[++top] = current;
+			current = current->left;
+		}
+
+		current = stack[top--];
+		func(current);
+		current = current->right;
+	}
 }
